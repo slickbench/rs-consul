@@ -56,6 +56,10 @@ quick_error! {
         InvalidRequest(err: serde_json::error::Error) {}
         /// The request was invalid and could not be converted into a proper http request.
         RequestError(err: http::Error) {}
+        /// The request was invalid and could not be converted into a proper http request.
+        UreqError(err: ureq::Error) {
+            from()
+        }
         /// The consul server response could not be converted into a proper http response.
         ResponseError(err: hyper::Error) {}
         /// The consul server response was invalid.
@@ -258,7 +262,7 @@ impl Consul {
                 "X-Consul-Token",
                 &self.config.token.clone().unwrap_or_default(),
             )
-            .send_bytes(&value);
+            .send_bytes(&value)?;
 
         let status = res.status();
         if status == 200 {
