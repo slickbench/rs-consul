@@ -32,7 +32,10 @@ use std::time::Duration;
 use std::{env, str::Utf8Error};
 
 use hyper::{body::Buf, client::HttpConnector, Body, Method};
+#[cfg(feature = "native-tls")]
 use hyper_tls::HttpsConnector;
+#[cfg(feature = "rustls-tls")]
+use hyper_rustls::HttpsConnector;
 use opentelemetry::global;
 use opentelemetry::global::BoxedTracer;
 use opentelemetry::trace::Span;
@@ -183,7 +186,10 @@ impl Consul {
     /// #Arguments:
     /// - [Config](consul::Config)
     pub fn new(config: Config) -> Self {
+        #[cfg(feature = "native-tls")]
         let https = HttpsConnector::new();
+        #[cfg(feature = "rustls-tls")]
+        let https = HttpsConnector::with_native_roots();
         let https_client = hyper::Client::builder().build::<_, hyper::Body>(https);
         Consul {
             https_client,
